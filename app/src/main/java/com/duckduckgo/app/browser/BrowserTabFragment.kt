@@ -2930,7 +2930,7 @@ class BrowserTabFragment :
     }
 
     private fun showSitePermissionsDialog(permissionsToRequest: Array<String>) {
-        sitePermissionsDialogLauncher.showSitePermissionDialog(requireContext(), permissionsToRequest)
+        sitePermissionsDialogLauncher.askForSitePermission(requireContext(), webView?.url ?: "", permissionsToRequest)
     }
 
     override fun continueDownload(pendingFileDownload: PendingFileDownload) {
