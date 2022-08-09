@@ -944,6 +944,7 @@ class BrowserTabFragment :
             }
             is Command.PrintLink -> launchPrint(it.url)
             is Command.ShowSitePermissionsDialog -> showSitePermissionsDialog(it.permissionsToRequest, it.request)
+            is Command.GrantSitePermissionRequest -> grantSitePermissionRequest(it.sitePermissionsToGrant, it.request)
             else -> {
                 // NO OP
             }
@@ -2933,8 +2934,12 @@ class BrowserTabFragment :
 
     private fun showSitePermissionsDialog(permissionsToRequest: Array<String>, request: PermissionRequest) {
         context?.let {
-            sitePermissionsDialogLauncher.askForSitePermission(it, webView?.url.orEmpty(), permissionsToRequest, request)
-        }
+            sitePermissionsDialogLauncher.askForSitePermission(it, webView?.url.orEmpty(), tabId, permissionsToRequest, request)
+    }
+    }
+
+    private fun grantSitePermissionRequest(sitePermissionsToGrant: Array<String>, request: PermissionRequest) {
+        request.grant(sitePermissionsToGrant)
     }
 
     override fun continueDownload(pendingFileDownload: PendingFileDownload) {
