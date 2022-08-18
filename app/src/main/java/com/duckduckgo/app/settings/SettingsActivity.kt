@@ -46,7 +46,6 @@ import com.duckduckgo.app.global.plugins.PluginPoint
 import com.duckduckgo.app.global.view.launchDefaultAppActivity
 import com.duckduckgo.app.globalprivacycontrol.ui.GlobalPrivacyControlActivity
 import com.duckduckgo.app.icon.ui.ChangeIconActivity
-import com.duckduckgo.app.location.ui.LocationPermissionsActivity
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.privacy.ui.WhitelistActivity
 import com.duckduckgo.app.settings.SettingsViewModel.AutomaticallyClearData
@@ -55,6 +54,7 @@ import com.duckduckgo.app.settings.clear.ClearWhatOption
 import com.duckduckgo.app.settings.clear.ClearWhenOption
 import com.duckduckgo.app.settings.clear.FireAnimation
 import com.duckduckgo.app.settings.extension.InternalFeaturePlugin
+import com.duckduckgo.app.sitepermissions.SitePermissionsActivity
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.waitlist.trackerprotection.ui.AppTPWaitlistActivity
 import com.duckduckgo.app.widget.AddWidgetLauncher
@@ -400,7 +400,7 @@ class SettingsActivity :
 
     private fun launchLocation() {
         val options = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-        startActivity(LocationPermissionsActivity.intent(this), options)
+        startActivity(SitePermissionsActivity.intent(this), options)
     }
 
     private fun launchWhitelist() {
