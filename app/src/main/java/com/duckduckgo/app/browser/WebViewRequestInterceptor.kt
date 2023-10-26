@@ -33,11 +33,14 @@ import com.duckduckgo.app.trackerdetection.CloakedCnameDetector
 import com.duckduckgo.app.trackerdetection.TrackerDetector
 import com.duckduckgo.app.trackerdetection.model.TrackerStatus
 import com.duckduckgo.app.trackerdetection.model.TrackingEvent
+import com.duckduckgo.cookies.api.CookieManagerProvider
 import com.duckduckgo.httpsupgrade.api.HttpsUpgrader
 import com.duckduckgo.privacy.config.api.Gpc
 import com.duckduckgo.request.filterer.api.RequestFilterer
 import com.duckduckgo.user.agent.api.UserAgentProvider
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import timber.log.Timber
 
 interface RequestInterceptor {
@@ -69,8 +72,11 @@ class WebViewRequestInterceptor(
     private val adClickManager: AdClickManager,
     private val cloakedCnameDetector: CloakedCnameDetector,
     private val requestFilterer: RequestFilterer,
+    private val cookieManager: CookieManagerProvider,
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
 ) : RequestInterceptor {
+
+    var client = OkHttpClient()
 
     override fun onPageStarted(url: String) {
         requestFilterer.registerOnPageCreated(url)
@@ -160,6 +166,20 @@ class WebViewRequestInterceptor(
         documentUrl: String?,
         webViewClientListener: WebViewClientListener?,
     ): WebResourceResponse? {
+        if (request.url.host == "kinja.com" && request.method == "GET") {
+            Timber.d("Kinja URL: ${request.url}")
+            val manualRequest = Request.Builder()
+                .url(request.url.toString())
+            request.requestHeaders.forEach { (key, value) -> manualRequest.addHeader(key, value) }
+            val cookie = cookieManager.get().getCookie(request.url.toString())
+            manualRequest.addHeader("cookie", cookie)
+            Timber.d("Kinja cookie: $cookie")
+            val response = client.newCall(manualRequest.build()).execute()
+            return response.body?.let { body ->
+                Timber.d("Kinja response: $response")
+                return WebResourceResponse(response.header("content-type", "application/javascript"), "UTF-8", body.byteStream())
+            }
+        }
         val trackingEvent = trackingEvent(request, documentUrl, webViewClientListener)
         if (trackingEvent?.status == TrackerStatus.BLOCKED) {
             return blockRequest(trackingEvent, request, webViewClientListener)
